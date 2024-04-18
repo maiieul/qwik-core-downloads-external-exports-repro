@@ -7,6 +7,7 @@ import { qwikVite } from "@builder.io/qwik/optimizer";
 import { qwikCity } from "@builder.io/qwik-city/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import pkg from "./package.json";
+import {isDev} from "@builder.io/qwik/build"
 
 const { dependencies = {}, devDependencies = {} } = pkg as any as {
   dependencies: Record<string, string>;
@@ -18,7 +19,29 @@ const { dependencies = {}, devDependencies = {} } = pkg as any as {
  * Note that Vite normally starts from `index.html` but the qwikCity plugin makes start at `src/entry.ssr.tsx` instead.
  */
 export default defineConfig(({ command, mode }): UserConfig => {
+  let output: any = {};
+  if (!isDev) {
+    // Client-specific configuration
+    output = {
+      // Customize the client build structure
+      entryFileNames: ({ name }: any) => {
+        if (name.startsWith('entry')) {
+          return '[name].js';
+        }
+        return `build/[name]-[hash].js`;
+      },
+      chunkFileNames: () => {
+        return `build/[name]-[hash].js`;
+      },
+      assetFileNames: `build/[name]-[hash].[ext]`,
+    };
+  }
   return {
+    build: {
+      rollupOptions: {
+        output,
+      },
+    },
     plugins: [qwikCity(), qwikVite(), tsconfigPaths()],
     // This tells Vite which dependencies to pre-build in dev mode.
     optimizeDeps: {

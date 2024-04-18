@@ -1,4 +1,4 @@
-import { component$, Slot } from "@builder.io/qwik";
+import { component$, Slot, useVisibleTask$ } from "@builder.io/qwik";
 import type { RequestHandler } from "@builder.io/qwik-city";
 
 export const onGet: RequestHandler = async ({ cacheControl }) => {
@@ -13,5 +13,15 @@ export const onGet: RequestHandler = async ({ cacheControl }) => {
 };
 
 export default component$(() => {
-  return <Slot />;
+  useVisibleTask$(() => {
+    console.log("visible");
+  });
+  return (
+    <>
+      <a href="/1">route 1</a>
+      <br />
+      <a href="/2">route 2</a>
+      <Slot />
+    </>
+  );
 });
